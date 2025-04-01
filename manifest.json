@@ -1,0 +1,15 @@
+{
+    "manifest_version": 2,
+    "name": "Mail link healer",
+    "version": "1.0",
+    "description": "CryptoSign",
+    "icons": {
+        "128": "128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [ "<all_urls>" ],
+            "js": [ "app.js" ]
+        }
+    ]
+ }
