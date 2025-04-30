@@ -1,15 +1,30 @@
 {
     "manifest_version": 2,
-    "name": "Mail link healer",
+    "name": "Crypto QR Generator",
     "version": "1.0",
-    "description": "CryptoSign",
+    "description": "Генератор QR-кодов с зашифрованными данными",
     "icons": {
-        "128": "128.png"
+      "48": "icons/icon-48.png",
+      "96": "icons/icon-96.png"
     },
-    "content_scripts": [
-        {
-            "matches": [ "<all_urls>" ],
-            "js": [ "app.js" ]
-        }
+    "permissions": [
+      "activeTab",
+      "storage"
+    ],
+    "browser_action": {
+      "default_icon": "icons/icon-32.png",
+      "default_title": "Crypto QR",
+      "default_popup": "popup/popup.html"
+    },
+    "background": {
+      "scripts": ["js/background.js"]
+    },
+    "options_ui": {
+      "page": "options/options.html",
+      "open_in_tab": false
+    },
+    "web_accessible_resources": [
+      "js/qrcode.js",
+      "js/crypto.js"
     ]
- }
+  }
