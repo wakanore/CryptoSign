@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Crypto QR Generator</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Crypto QR</h1>
+    
+    <div class="tab-container">
+      <button class="tab-button active" data-tab="generate">Generate</button>
+      <button class="tab-button" data-tab="decode">Decode</button>
+    </div>
+    
+    <div id="generate-tab" class="tab-content active">
+      <textarea id="input-data" placeholder="Enter data to encrypt"></textarea>
+      <input type="password" id="encrypt-password" placeholder="Encryption password">
+      <button id="generate-btn">Generate QR Code</button>
+      <div id="qr-container"></div>
+      <canvas id="qr-canvas" style="display: none;"></canvas>
+    </div>
+    
+    <div id="decode-tab" class="tab-content">
+      <input type="file" id="qr-file" accept="image/*">
+      <input type="password" id="decrypt-password" placeholder="Decryption password">
+      <button id="decode-btn">Decode QR Code</button>
+      <div id="decoded-result"></div>
+    </div>
+  </div>
+  
+  <script src="../js/qrcode.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
