@@ -2,35 +2,43 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Crypto QR Generator</title>
+  <title>Tracker Blocker</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="container">
-    <h1>Crypto QR</h1>
-    
-    <div class="tab-container">
-      <button class="tab-button active" data-tab="generate">Generate</button>
-      <button class="tab-button" data-tab="decode">Decode</button>
+    <header>
+      <h1>Tracker Blocker</h1>
+      <div class="toggle-container">
+        <span id="status-text">Active</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-blocking" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </header>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="total-cookies">0</div>
+        <div class="stat-label">Total Cookies</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="tracker-cookies">0</div>
+        <div class="stat-label">Trackers</div>
+      </div>
     </div>
-    
-    <div id="generate-tab" class="tab-content active">
-      <textarea id="input-data" placeholder="Enter data to encrypt"></textarea>
-      <input type="password" id="encrypt-password" placeholder="Encryption password">
-      <button id="generate-btn">Generate QR Code</button>
-      <div id="qr-container"></div>
-      <canvas id="qr-canvas" style="display: none;"></canvas>
+
+    <div class="actions">
+      <button id="scan-now" class="btn">Scan Now</button>
+      <button id="remove-all" class="btn danger">Remove All</button>
     </div>
-    
-    <div id="decode-tab" class="tab-content">
-      <input type="file" id="qr-file" accept="image/*">
-      <input type="password" id="decrypt-password" placeholder="Decryption password">
-      <button id="decode-btn">Decode QR Code</button>
-      <div id="decoded-result"></div>
+
+    <div class="tracker-list" id="tracker-list">
+      <div class="empty-state">No trackers found</div>
     </div>
   </div>
-  
-  <script src="../js/qrcode.js"></script>
+
   <script src="popup.js"></script>
 </body>
 </html>

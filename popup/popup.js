@@ -1,105 +1,101 @@
-document.addEventListener('DOMContentLoaded', function() {
-  // Переключение между вкладками
-  const tabs = document.querySelectorAll('.tab-button');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-      });
-      document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
-    });
-  });
-
-  // Генерация QR-кода
-  document.getElementById('generate-btn').addEventListener('click', async () => {
-    const data = document.getElementById('input-data').value;
-    const password = document.getElementById('encrypt-password').value;
-    
-    if (!data || !password) {
-      alert('Please enter data and password');
-      return;
+document.addEventListener('DOMContentLoaded', async () => {
+    const toggle = document.getElementById('toggle-blocking');
+    const statusText = document.getElementById('status-text');
+    const scanBtn = document.getElementById('scan-now');
+    const removeAllBtn = document.getElementById('remove-all');
+    const trackerList = document.getElementById('tracker-list');
+    const totalCookiesEl = document.getElementById('total-cookies');
+    const trackerCookiesEl = document.getElementById('tracker-cookies');
+  
+    // Load settings
+    const { blockAllTrackers } = await chrome.storage.sync.get('blockAllTrackers');
+    toggle.checked = blockAllTrackers !== false;
+    updateStatusText(toggle.checked);
+  
+    // Event listeners
+    toggle.addEventListener('change', handleToggleChange);
+    scanBtn.addEventListener('click', scanCookies);
+    removeAllBtn.addEventListener('click', removeAllTrackers);
+  
+    // Initial scan
+    await scanCookies();
+  
+    function updateStatusText(isActive) {
+      statusText.textContent = isActive ? 'Active' : 'Inactive';
+      statusText.style.color = isActive ? '#2ecc71' : '#e74c3c';
     }
-    
-    try {
-      const response = await chrome.runtime.sendMessage({
-        action: "encrypt",
-        data: data,
-        password: password
-      });
+  
+    async function handleToggleChange(e) {
+      const isActive = e.target.checked;
+      await chrome.storage.sync.set({ blockAllTrackers: isActive });
+      updateStatusText(isActive);
+    }
+  
+    async function scanCookies() {
+      const cookies = await chrome.cookies.getAll({});
+      const trackers = cookies.filter(cookie => isTrackerCookie(cookie));
       
-      if (response.success) {
-        const qrContainer = document.getElementById('qr-container');
-        qrContainer.innerHTML = '';
-        
-        // Генерация QR-кода
-        QRCode.toCanvas(document.getElementById('qr-canvas'), JSON.stringify(response.data), {
-          width: 200,
-          errorCorrectionLevel: 'H'
-        }, function(error) {
-          if (error) {
-            console.error(error);
-            alert('QR generation failed');
-          } else {
-            qrContainer.appendChild(document.getElementById('qr-canvas'));
-            document.getElementById('qr-canvas').style.display = 'block';
-          }
+      totalCookiesEl.textContent = cookies.length;
+      trackerCookiesEl.textContent = trackers.length;
+      
+      displayTrackers(trackers);
+    }
+  
+    function isTrackerCookie(cookie) {
+      // This should match the implementation in background.js
+      // For simplicity, we'll use a basic check here
+      const trackerDomains = ['google-analytics.com', 'facebook.com', 'doubleclick.net'];
+      const trackerPatterns = [/^_ga/, /^_gid/, /^fbp/];
+      
+      return trackerDomains.some(domain => cookie.domain.includes(domain)) ||
+             trackerPatterns.some(pattern => pattern.test(cookie.name));
+    }
+  
+    function displayTrackers(trackers) {
+      if (trackers.length === 0) {
+        trackerList.innerHTML = '<div class="empty-state">No trackers found</div>';
+        return;
+      }
+  
+      trackerList.innerHTML = '';
+      trackers.forEach(tracker => {
+        const item = document.createElement('div');
+        item.className = 'tracker-item';
+        item.innerHTML = `
+          <div>
+            <div class="tracker-name">${tracker.name}</div>
+            <div class="tracker-domain">${tracker.domain}</div>
+          </div>
+          <button class="remove-btn" data-name="${tracker.name}" data-domain="${tracker.domain}">Remove</button>
+        `;
+        trackerList.appendChild(item);
+      });
+  
+      // Add event listeners to remove buttons
+      document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const name = e.target.getAttribute('data-name');
+          const domain = e.target.getAttribute('data-domain');
+          await chrome.cookies.remove({
+            url: `https://${domain}`,
+            name: name
+          });
+          await scanCookies();
         });
-      } else {
-        alert(`Encryption failed: ${response.error}`);
-      }
-    } catch (error) {
-      alert(`Error: ${error.message}`);
-    }
-  });
-
-  // Декодирование QR-кода
-  document.getElementById('decode-btn').addEventListener('click', async () => {
-    const fileInput = document.getElementById('qr-file');
-    const password = document.getElementById('decrypt-password').value;
-    
-    if (!fileInput.files.length || !password) {
-      alert('Please select QR image and enter password');
-      return;
-    }
-    
-    try {
-      // Здесь должна быть реализация чтения QR-кода из изображения
-      // Для простоты предположим, что мы получаем данные
-      const qrData = await readQRFromImage(fileInput.files[0]);
-      const encryptedData = JSON.parse(qrData);
-      
-      const response = await chrome.runtime.sendMessage({
-        action: "decrypt",
-        data: encryptedData,
-        password: password
       });
+    }
+  
+    async function removeAllTrackers() {
+      const cookies = await chrome.cookies.getAll({});
+      const trackers = cookies.filter(cookie => isTrackerCookie(cookie));
       
-      if (response.success) {
-        document.getElementById('decoded-result').textContent = response.data;
-      } else {
-        alert(`Decryption failed: ${response.error}`);
+      for (const tracker of trackers) {
+        await chrome.cookies.remove({
+          url: `https://${tracker.domain}`,
+          name: tracker.name
+        });
       }
-    } catch (error) {
-      alert(`Error: ${error.message}`);
+      
+      await scanCookies();
     }
   });
-});
-
-// Функция для чтения QR-кода из изображения (заглушка)
-async function readQRFromImage(file) {
-  // В реальной реализации здесь должен быть код для декодирования QR
-  // Например, с использованием библиотеки jsQR
-  return new Promise((resolve, reject) => {
-    // Заглушка для демонстрации
-    const reader = new FileReader();
-    reader.onload = () => {
-      // В реальном приложении здесь анализируется изображение
-      resolve('{"ciphertext":[1,2,3],"iv":[4,5,6],"salt":[7,8,9]}');
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
