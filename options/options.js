@@ -5,13 +5,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const whitelistItems = document.getElementById('whitelist-items');
     const saveSettingsBtn = document.getElementById('save-settings');
   
-    // Load current settings
+    // Текущие настройки загрузки
     const { blockAllTrackers = true, whitelist = [] } = await chrome.storage.sync.get(['blockAllTrackers', 'whitelist']);
     
     blockAllCheckbox.checked = blockAllTrackers;
     renderWhitelist(whitelist);
   
-    // Event listeners
+    // Прослушиватели событий
     addWhitelistBtn.addEventListener('click', addToWhitelist);
     saveSettingsBtn.addEventListener('click', saveSettings);
   
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         whitelistItems.appendChild(li);
       });
       
-      // Add event listeners to remove buttons
+
       document.querySelectorAll('#whitelist-items button').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const domain = e.target.getAttribute('data-domain');
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         blockAllTrackers: blockAllCheckbox.checked
       });
       
-      // Show confirmation
+
       saveSettingsBtn.textContent = 'Saved!';
       setTimeout(() => {
         saveSettingsBtn.textContent = 'Save Settings';

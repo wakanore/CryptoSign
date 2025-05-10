@@ -7,17 +7,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const totalCookiesEl = document.getElementById('total-cookies');
     const trackerCookiesEl = document.getElementById('tracker-cookies');
   
-    // Load settings
+    
     const { blockAllTrackers } = await chrome.storage.sync.get('blockAllTrackers');
     toggle.checked = blockAllTrackers !== false;
     updateStatusText(toggle.checked);
   
-    // Event listeners
+    
     toggle.addEventListener('change', handleToggleChange);
     scanBtn.addEventListener('click', scanCookies);
     removeAllBtn.addEventListener('click', removeAllTrackers);
   
-    // Initial scan
+    
     await scanCookies();
   
     function updateStatusText(isActive) {
@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   
     function isTrackerCookie(cookie) {
-      // This should match the implementation in background.js
-      // For simplicity, we'll use a basic check here
+      
+      
       const trackerDomains = ['google-analytics.com', 'facebook.com', 'doubleclick.net'];
       const trackerPatterns = [/^_ga/, /^_gid/, /^fbp/];
       
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         trackerList.appendChild(item);
       });
   
-      // Add event listeners to remove buttons
+      
       document.querySelectorAll('.remove-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const name = e.target.getAttribute('data-name');

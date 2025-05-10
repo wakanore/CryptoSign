@@ -1,4 +1,3 @@
-// utils/cookie-analyzer.js
 const encoder = new TextEncoder();
 
 async function hashString(str) {

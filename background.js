@@ -1,4 +1,3 @@
-// background.js
 async function isTrackerCookie(cookie) {
     const { hashedTrackerDb, trackerDb } = await loadTrackerDatabase();
     const hashedName = await hashString(cookie.name);
